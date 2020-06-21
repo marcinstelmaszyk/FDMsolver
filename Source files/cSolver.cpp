@@ -5,7 +5,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <ctime>
-#include <Eigen/LU>
+#include <eigen3/Eigen/LU>
 
 
 double cSolver::distanceBetween(cPoint & p_1, cPoint & p_2){

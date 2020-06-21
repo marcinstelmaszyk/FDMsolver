@@ -1,7 +1,7 @@
 #ifndef _CSOLVER_H_
 #define _CSOLVER_H_
 
-#include <Eigen/Sparse>
+#include <eigen3/Eigen/Sparse>
 #include "cSolution.h"
 #include "cGrid.h"
 
