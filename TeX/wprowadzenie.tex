@@ -1,0 +1,34 @@
+\chapter{Wprowadzenie}
+\section{Opis projektu}
+
+\indent\indent Odległość od brzegu, $d$, pozostaje nadal kluczowym parametrem przy modelowaniu turbulencji oraz generowaniu siatek obliczeniowych\footcite{Tucker}.
+
+\indent Celem niniejszego projektu jest opracowanie programu  umożliwiającego wyznaczanie minimalnej odległości między danym węzłem siatki, a brzegiem profilu lotniczego.
+ 
+Najprostszym sposobem rozwiązania powyższego zagadnienia jest  bezpośrednie obliczenie odległości $d$ danego węzła $P$ od kolejnych węzłów $S$ należących do brzegu profilu korzystając z miary euklidesowej:
+
+\begin{equation}
+d(P,S)= \sqrt{(x_p-x_s)^2 + (y_p-y_s)^2}
+\end{equation}
+
+\noindent a następnie wybranie najmniejszej wartości z utworzonego zbioru odległości $\{d_0, d_1, ..., d_n\}$. Metoda ta, znana w terminologii algorytmicznej jako \textit{metoda siłowa} (ang. \textit{Brute Force}), jest łatwa do zaimplementowania, a liczba operacji potrzebnych do jej wykonania dla siatek stałych w czasie jest mała w stosunku do kosztu całego rozwiązania. Niemniej jednak, szybkie znalezienie odległości od brzegu ma kluczowe znaczenie dla problemów rozwiązywanych przy użyciu siatek deformujących się i adaptacyjnych, dla których wyznaczenie minimalnej odległości od brzegu jest przeprowadzane wielokrotnie\footcite{Ibid}. 
+
+Innym podejściem jest wykorzystanie równań różniczkowych cząstkowych. Do rozwiązania problemu Sethain\footcite{Sethain} zaproponował wykorzystanie równania Eikonału następującej postaci
+
+\begin{equation}
+\label{eq:eikonal}
+\left|\nabla \phi\right|=1+\lambda\nabla^2\phi
+\end{equation}
+
+\newpage
+\indent Niniejszy projekt skupi się na implementacji uproszczonej  jego wersji, a mianowicie równaniu Poissona na płaszczyźnie $(x,y)$
+
+\begin{equation}
+\nabla^2\phi = - 1
+\end{equation}
+
+\indent Pomocniczo została utworzona siatka obliczeniowa wokół profilu, o strukturze dopasowanej do zadanego brzegu obszaru. Tak zdefiniowana przestrzeń fizyczna została przetransformowana do przestrzeni obliczeniowej, a następnie zdyskretyzowana metodą różnic skończonych. Powstały układ równań algebraicznych rozwiązano metodą iteracyjną. Otrzymane wyniki skonfrontowano z rozwiązaniem siłowym.
+
+\indent Program został zaimplementowany w języku C++ przy użyciu darmowego środowiska programistycznego Microsoft Visual Studio Express 2012\footnote{\url{www.microsoft.com/visualstudio/}}. Język C++ ma szerokie zastosowanie w programach obliczeniowych, więc jego wykorzystanie umożliwia integrację w istniejących lub przyszłych kodach obliczeniowych. Do wizualizacji wyników skorzystano z programu \textsf{Tecplot 360}\footnote{\url{www.tecplot.com}}.
+
+\indent Niniejsza dokumentacja została stworzona w języku \LaTeX\quad przy użyciu edytora \textsf{TexMaker 3.5.2}\footnote{\url{http://www.xm1math.net/texmaker/}}.

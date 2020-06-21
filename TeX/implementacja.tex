@@ -1,0 +1,168 @@
+\chapter{Implementacja}
+
+\indent 
+
+
+\section{Układ logiczny programu}
+
+\indent\indent Funkcjonalność programu została podzielona między klasy \textsf{cGrid, cSolution} oraz \textsf{cSolver}. Pierwsza z nich przechowuje wygenerowaną siatkę obliczeniową, druga otrzymane rozwiązanie, natomiast  ostatnia z nich jest klasą nadrzędną, z jej poziomu wywoływane są wszystkie operacje przewidziane w funkcjonalności programu. 
+
+\section{Biblioteki zewnętrzne}\label{sec:bibl_zewn}
+
+\indent\indent Do operacji na macierzach wykorzystano darmową bibliotekę języka C++ Eigen (wersja 3.1.2). Za jej wyborem do niniejszego projektu przemawia niezawodność i szybkość operacji na macierzach dowolnych rozmiarów, oraz zaimplementowanie metod do rozwiązania rzadkich układów macierzowych\footnote{\url{http://eigen.tuxfamily.org/}}.
+
+\section{Klasa cGrid}
+
+\indent\indent Przechowuje węzły siatki oraz umożliwia do nich dostęp. Do przechowywania węzłów posłużono się kontenerem \textsf{vector} zaimplementowanym w bibliotece standardowej języka C++.
+
+\begin{lstlisting}[style = nonumbers]
+	std::vector<cPoint> mPoints;	
+\end{lstlisting}
+
+\noindent W przeciwieństwie do dwuwymiarowej struktury siatki sam kontener przechowuje elementy w porządku liniowym, co wymusza dodanie operatora dostępu do elementu (węzła) o indeksach $(i,j)$.
+\begin{lstlisting}[style = nonumbers]
+	cPoint & operator()(const int i, const int j)
+\end{lstlisting}
+\noindent Dodawanie węzłów do kontenera odbywa się przy pomocy metody 
+\begin{lstlisting}[style = nonumbers]
+	void	addNode(const cPoint & inPoint, eGridMode mode = GRID)	
+\end{lstlisting}	
+gdzie oprócz referencji do węzła przekazuje się jego typ \textsf{GRID / PROFILE}. Jest to o tyle ważne, ponieważ dodanie węzła profilu zwiększa wartość wewnętrznego licznika, na podstawie którego jest generowana siatka i przeprowadzane rozwiązanie metodą siłową.
+
+\noindent Poniższe metody dostępowe zwracają odpowiednio liczbę węzłów \newline (\textsf{GRID} - siatki, \textsf{PROFILE} - na profilu) oraz rzędów siatki
+\begin{lstlisting}[style = nonumbers]
+	int	nodeCount(eGridMode mode = GRID) const	
+	int	rowCount() const;
+\end{lstlisting}	
+
+\section{Klasa cSolution}
+
+\indent\indent Publiczna klasa dziedziczona po klasie \textsf{cGrid}, oprócz obiektu siatki dodatkowo przechowuje w kontenerze typu \textsf{vector} wartości obliczonego rozwiązania zagadnienia. Poniższa metoda dodaje do kontenera wartość \textsf{inValue} typu (\textsf{DISTANCE, PHI})
+
+\begin{lstlisting}[style = nonumbers]
+	void	addValue(double inValue, eSolutionData valueType= DISTANCE);	
+\end{lstlisting}
+Analogicznie zwrot zapisanych wartości uzyskuje się korzystając z metody
+
+\begin{lstlisting}[style = nonumbers]
+	double	getValue(int k, eSolutionData valueType = DISTANCE);
+\end{lstlisting}
+gdzie $k$ jest bezwzględnym numerem węzła 
+
+
+\section{Klasa cSolver}
+
+\indent\indent Nadrzędna klasa programu będąca jego interfejsem. Przechowuje obiekt \textsf{mSolution} typu \textsf{cSolution} oraz obiekty klasy \textsf{Eigen}, które wykorzystywane są do rozwiązania układu macierzowego:
+
+\begin{lstlisting}[style = nonumbers]
+	//Macierz wsp'ó''ł'czynnik'ó'w
+	Eigen::SparseMatrix<double>		K;
+	
+	//Wektor prawej strony		
+	Eigen::VectorXd					f;	
+	
+	//Wektor rozwi'ą'zania		
+	Eigen::VectorXd					x;	
+		
+	//Obiekt rozwi'ą'zuj'ą'cy uk'ł'ad			 
+	Eigen::BiCGSTAB<Eigen::SparseMatrix<double>>	solver;		
+\end{lstlisting}
+
+
+
+\subsection{Metody prywatne}
+
+\noindent Metoda implementująca rozwiązanie siłowe
+\begin{lstlisting}[style = nonumbers]
+	void	solveBruteForce()		
+\end{lstlisting}
+\color{white}{.}\color{black}{}		%Sztuczny odstęp
+
+\noindent Metoda implementująca rozwiązanie równaniem Poissona
+\begin{lstlisting}[style = nonumbers]
+	void	solvePoisson()		
+\end{lstlisting}
+\color{white}{.}\color{black}{}		%Sztuczny odstęp
+
+\noindent Metoda bezpośrednio wyznaczająca odległość między węzłami
+\begin{lstlisting}[style = nonumbers]
+	double	distanceBetween(cPoint & p_1, cPoint & p_2)
+\end{lstlisting}
+\vspace*{-.5cm}
+\begin{enumerate} \itemsep1pt \parskip0pt \parsep0pt
+	\item[-] \textsf{argumenty:} 
+	\item[] p\_1 - referencja do pierwszego węzła
+	\item[] p\_2 - referencja do drugiego węzła
+	\item[-] \textsf{zwraca:} odległość $d(p_1,p_2)$	
+\end{enumerate}
+
+\noindent Metoda wyznaczająca odległość na postawie wzoru \ref{eq:jakobian}
+\begin{lstlisting}[style = nonumbers]
+	void	computeDistance()	
+\end{lstlisting}
+\color{white}{.}\color{black}{}		%Sztuczny odstęp
+
+\noindent Metoda obliczająca pochodne cząstkowe dla danego węzła siatki
+\begin{lstlisting}[style = nonumbers]
+	double	partial(int k, ePartial partial);
+\end{lstlisting}
+\vspace*{-.5cm}
+\begin{enumerate} \itemsep1pt \parskip0pt \parsep0pt
+	\item[-] \textsf{argumenty:} 
+	\item[] k - bezwzględny numer węzła 
+	\item[] partial - rodzaj pochodnej ($x_u, x_v, y_u, y_v, x_{uu}, x_{uv}, x_{vv}, y_{uu}, y_{uv}, y_{vv}$)
+	\item[-] \textsf{zwraca:} wartość pochodnej	
+\end{enumerate}
+
+
+
+
+\subsection{Metody publiczne}
+\noindent Metoda wczytująca do pamięci współrzędne węzłów profilu
+\begin{lstlisting}[style = nonumbers]
+	void	addProfile(std::string filePath)
+\end{lstlisting}
+\vspace*{-.5cm}
+\begin{enumerate} \itemsep1pt \parskip0pt \parsep0pt
+	\item[-] \textsf{argument:} ścieżka do pliku z danymi wejściowymi\newline	
+\end{enumerate}
+
+\noindent Metoda generująca siatkę obliczeniową wokół profilu
+\begin{lstlisting}[style = nonumbers]
+	void	generateGrid(cPoint & circleCenter,
+						 double circleRadius,
+						 int linesDensity)
+\end{lstlisting}
+\vspace*{-.5cm}
+\begin{enumerate} \itemsep1pt \parskip0pt \parsep0pt
+	\item[-] \textsf{argumenty:} 
+	\item[] circleCenter - punkt środka siatki
+	\item[] circleRadius - promień siatki
+	\item[] linesDensity - ilość rzędów siatki\newline		
+\end{enumerate}
+
+\noindent Metoda rozwiązująca zagadnienie
+\begin{lstlisting}[style = nonumbers]
+	double	solve(eSolutionType type = POISSON)	
+\end{lstlisting}
+\vspace*{-.5cm}
+\begin{enumerate} \itemsep1pt \parskip0pt \parsep0pt
+	\item[-] \textsf{argumenty:}
+	\item[] type - rodzaj używanej metody (POISSON, BRUTE FORCE)
+	\item[-] \textsf{zwraca:} czas wykonania w sekundach\newline	
+\end{enumerate} 
+
+\noindent Metoda zapisująca rozwiązanie do pliku
+\begin{lstlisting}[style = nonumbers]
+	void	saveSolution(eSolutionData dataType = DISTANCE,
+	                     std::string filePath = "solution.dat",  
+	                     eFileExtension extension = TECPLOT)	
+\end{lstlisting}
+\vspace*{-.5cm}
+\begin{enumerate} \itemsep1pt \parskip0pt \parsep0pt
+	\item[-] \textsf{argumenty:}
+	\item[] dataType - rodzaj zapisywanej danej, domyślnie odległość
+	\item[] filePath - ścieżka i nazwa pliku wynikowego
+	\item[] extension - opcjonalne dodanie nagłówka programu Tecplop\newline
+\end{enumerate} 
+

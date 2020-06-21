@@ -1,0 +1,5 @@
+# Cmake-build
+/cmake-build-debug/
+
+# Processor's output files
+/output/

@@ -1,0 +1,98 @@
+\chapter{Opis interfejsu programu}
+
+\indent\indent Niniejszy dodatek opisuje sposób korzystania ze stworzonego w ramach niniejszego projektu programu \textsf{wallDistanceSolver.exe}, oraz jego interfejsu, do własnego użytku.
+
+\section{Dane wejściowe}
+
+\indent\indent Danymi wejściowymi do programu są współrzędne profilu zapisane w dwóch kolumnach, kolejno dla kierunku x oraz y, z użyciem kropki jako separatora dziesiętnego (kod źródłowy \ref{list:dane_wejściowe}). Domyślna nazwa pliku to \texttt{\mbox{NACA\_0012.dat}}
+
+\begin{lstlisting}[label=list:dane_wejściowe,caption=Format zapisu danych wejściowych]
+	0.964244   0.006169
+	0.947231   0.008434
+	........   ........
+	........   ........	
+\end{lstlisting}
+
+\noindent\newline Sugeruje się nie pozostawiać pustych wierszy, złamanych znakiem nowej linii (enterem) na końcu kolumn, aby uniknąć możliwego wczytania nic nie znaczących znaków. Należy również zwrócić uwagę, aby wartości w wierszach nie powtarzały się, bowiem spowoduje to utworzenie kilku węzłów w tym samym punkcie, co przełoży się na rozwiązanie błędnie wygenerowanego układu równań \ref{eq:poisson_macierz}.   
+
+\section{Dane wyjściowe}
+
+\indent\indent Danymi wyjściowymi z programu są współrzędne $(x,y)$ węzłów siatki oraz wartość odległości od brzegu $d$, zapisane w trzech kolumnach w kolejności jak powyżej, z użyciem kropki jako separatora dziesiętnego (kod źródłowy \ref{list:dane_wyjściowe}). Dodatkowo program umożliwia wstawienie nagłówka niezbędnego do wczytania danych do oprogramowania \texttt{Tecplot 360}\footnote{\url{ftp://ftp.tecplot.com/pub/doc/tecplot/360/dataformat.pdf}, s. 134}
+
+\begin{lstlisting}[label=list:dane_wyjściowe,caption=Format zapisu danych wyjściowych]
+\end{lstlisting}\begin{center}
+\underline{Zwykłe formatowanie}
+\end{center}
+\begin{lstlisting}  
+              1              0              0
+       0.979641       0.004079              0
+       0.964244       0.006169              0 
+       ........       ........       ........
+       0.850307       0.032659       0.012574
+       0.831428       0.035881       0.013543
+	   ........       ........	     ........	
+\end{lstlisting}
+\begin{center}
+\underline{Format danych programu Tecplot 360}
+\end{center}
+\begin{lstlisting}  
+	VARIABLES = "X", "Y", "U",
+	ZONE I=124, J=41, DATAPACKING=POINT
+
+              1              0              0
+       0.979641       0.004079              0
+       0.964244       0.006169              0 
+       ........       ........       ........
+       0.850307       0.032659       0.012574
+       0.831428       0.035881       0.013543
+	   ........       ........	     ........
+\end{lstlisting}
+
+
+\section{Przykładowy program}
+
+\indent\indent W pierwszym kroku definiowane są zmienne pomocnicze, określające promień siatki \textsf{circleRadius}, liczbę rzędów \textsf{gridDensity} oraz położenie jej środka \textsf{S} (korzystając z  klasy pomocniczej \textsf{cPoint}).
+
+Następnie następuje inicjalizacja obiektu solvera \textsf{CASE}, oraz wczytanie z pliku współrzędnych punktów profilu metodą \textsf{addProfile()}. Na podstawie tych danych tworzona jest siatka o wcześniej zdefiniowanych parametrach (metoda \textsf{generateGrid()}). Rozwiązanie zagadnienia odbywa się przy użyciu metody \textsf{solve(POISSON)}\footnote{Dla celów porównawczych można skorzystać z metody siłowej. W tym celu należy zmienić typ wyliczeniowy z \textsf{POISSON} na \textsf{BRUTE\_FORCE}.}
+
+W ostatnim kroku otrzymane rozwiązanie jest zapisywane metodą \\ \mbox{\textsf{saveSolution()}}. Treść komunikatów programu przedstawiono w kodzie źródłowym (\ref{list:konsola}).
+
+\begin{lstlisting}[label=list:program,caption=Przykładowy program rozwiązujący zagadnienie]
+	#include <iostream>
+	#include "cSolver.h"
+
+	int main(int argc, char * argv[]){
+		//Grid parametres
+		cPoint	S				= cPoint(0.5, 0.0);	
+		double	circleRadius	= 1;
+		int		gridDensity		= 40;
+
+		cSolver CASE;
+
+		//Read profile from a file
+		CASE.addProfile("../../data/NACA_0012.dat");
+
+		//Generate grid based on profile
+		CASE.generateGrid(S, circleRadius, gridDensity);
+
+		//Solve problem
+		std::cout << CASE.solve(POISSON) << std::endl;
+	
+		//Save solution to a file
+		CASE.saveSolution(DISTANCE);	
+	
+		return 0;
+	}
+\end{lstlisting}
+
+
+\begin{lstlisting}[label=list:konsola,caption=Widok konsoli programu]
+	Generating grid
+	Grid generated!
+	Solving Poisson...
+		#iterations: 81	estimated error: 1.83435e-06
+	Solution solved!
+	6.908
+	Saving solution...
+	Solution saved!
+\end{lstlisting}
