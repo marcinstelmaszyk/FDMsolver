@@ -20,7 +20,7 @@ int main(int argc, char * argv[]){
 	std::cout << CASE.solve(POISSON) << std::endl;
 	
 	//Save solution to a file
-	CASE.saveSolution(DISTANCE,"../data/NACA_0012_poisson.dat");
+	CASE.saveSolution(DISTANCE,"../output/NACA_0012_poisson.dat");
 
 	system("PAUSE");
 	return 0;
