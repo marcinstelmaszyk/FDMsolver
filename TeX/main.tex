@@ -1,0 +1,139 @@
+\documentclass[12pt,a4paper,twoside]{report}
+
+%Paczki ----------------------------------------------------------------
+\usepackage{polski}					%Język dokumentu
+\usepackage[utf8]{inputenc}			%Kodowanie znaków
+\usepackage[table]{xcolor}			%Kolory w tabeli
+\usepackage{hyperref}				%Hiperłącza
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{multirow}				%Macierze z dużą ilością wierszy
+\usepackage{mathtools}
+\usepackage{pdfpages}				%Wstawienie pdf ze stroną tytułową
+\usepackage{appendix}				%Rozdział z dodatkami
+\usepackage{color}					%Kolorowanie tekstu
+\usepackage{float}					%Pozycjonowanie rysunków
+\usepackage{epstopdf}				%Konwesja eps do pdf
+\usepackage{fancyhdr}
+\usepackage{rotating}				%Obracanie tabeli
+\usepackage{listings}				%Kod źródłowy
+\usepackage{nomencl}				%Spis oznaczeń użytych w projekcie
+\usepackage{graphicx}				%Wstawianie rysunków
+\usepackage{caption}
+\usepackage{subcaption}				%Podpisy pod wieloobrazkami
+
+
+
+
+%Rozmiar macierzy------------------------------------------------------
+\setcounter{MaxMatrixCols}{20} 
+
+
+
+%Żywa pagina-----------------------------------------------------------
+\pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+\fancyhf{} % usun biezace ustawienia pagin
+\fancyhead[LE,RO]{\small\bfseries\thepage}
+\fancyhead[LO]{\small\bfseries\rightmark}
+\fancyhead[RE]{\small\bfseries\leftmark}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0pt}
+\addtolength{\headheight}{0.5pt} % pionowy odstep na kreske
+\fancypagestyle{plain}{	%Strony z początkiem rozdziału
+	\fancyhead{} 		% usun p. górne na stronach pozbawionych numeracj
+	\renewcommand{\headrulewidth}{0pt}	%Zerowa grubość poziomej kreski
+}
+
+
+
+%Przesunięcie tytułu rozdziału w górę strony-----------------------------
+\usepackage{titlesec}
+\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+\titleformat{\chapter}[display]{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+
+
+
+%Marginesy---------------------------------------------------------------
+\evensidemargin = 10pt	%=10pt
+\oddsidemargin 	= 40pt 	%=50pt
+
+
+%Cytowanie w stopce strony-----------------------------------------------
+\usepackage[style=verbose,autocite=footnote,maxnames=10,babel=hyphen,hyperref=true,abbreviate=false,backend=biber]{biblatex} 
+
+
+
+%Kod źródłowy-------------------------------------------------------------
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1 #2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont={bf,white},textfont=white}
+\renewcommand\lstlistingname{Kod źródłowy}												
+
+%Formatowanie kodu źródłowego C++ --------------------
+\definecolor{dark_green}{rgb}{0,0.6,0}		%Definicja koloru zielonego
+\definecolor{light-gray}{gray}{0.93}		%Definicja koloru jasnoszarego
+\lstdefinestyle{nonumbers}{numbers=none}	%Brak numeracji listeningu
+\lstset{
+	language		= C++,					%Język programowania
+	commentstyle	= \color{dark_green},	%Kolor komentarzy
+	extendedchars	= false,
+	escapeinside	= '',
+	numbers			= left,					%Numerowanie linii kodu
+	numbersep		= 2pt,					%Odsunięcie numeracji od kodu 
+	numberstyle		= \color{blue},			%Kolor numerów linii kodu
+	stepnumber		= 2, 					%Widoczne numery linii kodu
+	basicstyle		= \footnotesize,		%Format tekstu
+	tabsize			= 4,					%Wielkość wcięć
+	backgroundcolor = \color{light-gray},	%Kolor tła
+	morekeywords	= {cPoint,std,string,eSolutionType,POISSON,
+						DISTANCE,cout,endl,cSolver,TECPLOT}	%Pogrubienie dodatkowych słów kluczowych
+}
+
+
+
+%Dodanie nawiasów klamrowych do \ref -----------------------------
+\let\oldtheequation\theequation
+\makeatletter
+\def\tagform@#1{\maketag@@@{\ignorespaces#1\unskip\@@italiccorr}}
+\renewcommand{\theequation}{(\oldtheequation)}
+\renewcommand{\theequation}{(\oldtheequation)}
+\makeatother 
+
+
+
+%Wyczyszczenie z nagłówka pustej strony (nadpisanie \cleardoublepage)
+\let\origdoublepage\cleardoublepage
+\newcommand{\clearemptydoublepage}{%
+  \clearpage
+  {\pagestyle{empty}\origdoublepage}%
+}
+
+
+
+\author{Marcin Stelmaszyk}			
+\title{Wyznaczenie odległości od brzegu w oparciu o równania różniczkowe cząstkowe.}
+
+
+
+%Struktura dokumentacji--------------------------------------------------
+\begin{document}
+	%Strony początkowe
+	\includepdf{strona_tytulowa.pdf}	%Strona tytułowa
+	
+	\clearemptydoublepage 				%Spis treści od strony nieparzystej 
+	\tableofcontents					%Spis treści
+	\clearemptydoublepage 				%Wprowadzenie od strony nieparzystej
+	\include{wprowadzenie}
+	\include{model_matematyczny}
+	\include{implementacja}
+	\include{wyniki}
+	\include{wnioski}	
+	\include{bibliografia}	
+	\appendix							%Dodatki
+	\include{dodatek_A}					%Opis interfejsu programu
+	\include{dodatek_B}					%Zawartość płyty CD
+\end{document}
