@@ -22,6 +22,5 @@ int main(int argc, char * argv[]){
 	//Save solution to a file
 	CASE.saveSolution(DISTANCE,"../output/NACA_0012_poisson.dat");
 
-	system("PAUSE");
 	return 0;
 }
